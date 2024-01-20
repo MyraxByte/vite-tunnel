@@ -1,11 +1,9 @@
-import { DEVTOOLS_ELEMENT_ID, DEVTOOLS_ELEMENT_TOGGLE_ID, DEVTOOLS_ELEMENT_WINDOW_ID, ViteDevtools, ViteDevtoolsToggle } from "@vite-libs/devtools";
+import { DEVTOOLS_ELEMENT_ID, DEVTOOLS_ELEMENT_TOGGLE_ID, DEVTOOLS_ELEMENT_WINDOW_ID } from "@vite-libs/devtools";
 
-const devtoolsOptions = 'virtual:vite-devtools-options' as any;
 // @ts-ignore
-const devtoolsDir = `${devtoolsOptions.base || '/'}@id/virtual:vite-devtools-path:index`;
-(window as any).__VITE_DEVTOOLS_PLUGIN_DETECTED__ = true;
+window.__VITE_DEVTOOLS_PLUGIN_DETECTED__ = true;
 
-const devtools = document.createElement(DEVTOOLS_ELEMENT_ID) as ViteDevtools;
+const devtools = document.createElement(DEVTOOLS_ELEMENT_ID);
 
 devtools.insertApp({
     id: 'vite-tunnel',
@@ -83,15 +81,15 @@ devtools.insertApp({
         section.appendChild(fieldTitle);
         section.appendChild(fieldDescription);
 
-        const toggle = document.createElement(DEVTOOLS_ELEMENT_TOGGLE_ID) as ViteDevtoolsToggle;
+        const toggle = document.createElement(DEVTOOLS_ELEMENT_TOGGLE_ID);
         toggle.input.addEventListener("change", (e) => {
-            (import.meta as any).hot?.send("vite-tunnel:toggled", {
+            import.meta.hot?.send("vite-tunnel:toggled", {
                 // @ts-ignore
                 checked: e.currentTarget?.checked,
             });
         });
 
-        (import.meta as any).hot?.on("vite-tunnel:tunnel-url", (data) => {
+        import.meta.hot?.on("vite-tunnel:tunnel-url", (data) => {
             // Got the tunnel URL from the server
             if (data.url) {
                 toggle.input.checked = true;
@@ -131,5 +129,6 @@ devtools.insertApp({
     },
 })
 
-
-document.body.appendChild(devtools);
+export function inject() {
+    document.body.appendChild(devtools);
+}

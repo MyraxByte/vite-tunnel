@@ -1,5 +1,7 @@
+import { BuildConfig } from "unbuild"
+
 export default [{
-  entries: ["src/plugin/index.ts"],
+  entries: ["src/plugin.ts"],
   outDir: "dist",
   clean: true,
   declaration: true,
@@ -13,19 +15,4 @@ export default [{
     },
     inlineDependencies: true,
   },
-}, {
-  entries: ["src/client/index.ts"],
-  outDir: "dist",
-  clean: true,
-  declaration: true,
-  externals: [
-    '@vite-libs/devtools'
-  ],
-  rollup: {
-    emitCJS: true,
-    esbuild: {
-      minify: true
-    },
-    inlineDependencies: true,
-  },
-}]
+}] as BuildConfig[]

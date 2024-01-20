@@ -1,15 +1,9 @@
 import { startTunnel } from "untun";
 import type { Tunnel, TunnelOptions } from "untun";
-import { fileURLToPath } from "node:url";
-import { PluginOption, ResolvedConfig, normalizePath } from "vite"
-import path from "node:path";
+import { PluginOption, ResolvedConfig } from "vite"
+import { CLIENT_RUNTIME_ENTRY_PATH, CLIENT_RUNTIME_PATH, composePreambleCode, runtimeCode, wrapVirtualPrefix } from "./client";
 
 type ViteTunnelOptions = TunnelOptions;
-
-function getDevtoolsPath() {
-	const pluginPath = normalizePath(path.dirname(fileURLToPath(import.meta.url)))
-	return pluginPath.replace(/\/dist$/, '/\/dist/client')
-}
 
 const defaultOptions: ViteTunnelOptions = {
 	port: 5521,
@@ -21,11 +15,9 @@ const defaultOptions: ViteTunnelOptions = {
 
 
 export default function ViteTunnelPlugin(options: ViteTunnelOptions = defaultOptions) {
-	const devtoolsPath = getDevtoolsPath();
-	console.log(devtoolsPath)
 	let config: ResolvedConfig
 	let tunnel: Tunnel | undefined;
-
+	let baseWithOrigin: string = "/";
 
 	const plugin = <PluginOption>{
 		name: 'vite-tunnel',
@@ -33,6 +25,7 @@ export default function ViteTunnelPlugin(options: ViteTunnelOptions = defaultOpt
 		apply: 'serve',
 		configResolved(resolvedConfig) {
 			config = resolvedConfig
+			baseWithOrigin = config.server.origin ? config.server.origin + config.base : config.base
 		},
 		configureServer(server) {
 			server.ws.on("vite-devtools:vite-tunnel:initialized", async () => {
@@ -65,26 +58,23 @@ export default function ViteTunnelPlugin(options: ViteTunnelOptions = defaultOpt
 				},
 			);
 		},
-		async resolveId(importer: string) {
-			if (importer.startsWith('virtual:vite-devtools-options')) {
-				return importer
+		async resolveId(id: string) {
+			if (id === CLIENT_RUNTIME_PATH || id === CLIENT_RUNTIME_ENTRY_PATH) {
+				return wrapVirtualPrefix(id)
 			}
-			else if (importer.startsWith('virtual:vite-devtools-path:')) {
-				const resolved = importer.replace('virtual:vite-devtools-path:', `${devtoolsPath}/`)
-				return resolved
-			}
-		},
-		async load(id: string) {
-			if (id === 'virtual:vite-devtools-options')
-				return `export default ${JSON.stringify({ base: config.base })}`
-		},
-		transform(code, id) {
-			const { root, base } = config
 
-			const projectPath = `${root}${base}`
-			if (!id.startsWith(projectPath)) return
-			console.log(id, projectPath)
-			return code
+			return
+		},
+		async load(id) {
+			if (id === wrapVirtualPrefix(CLIENT_RUNTIME_PATH)) {
+				return runtimeCode
+			}
+
+			if (id === wrapVirtualPrefix(CLIENT_RUNTIME_ENTRY_PATH)) {
+				return composePreambleCode({ baseWithOrigin })
+			}
+
+			return
 		},
 		transformIndexHtml(html) {
 			return {
@@ -92,11 +82,10 @@ export default function ViteTunnelPlugin(options: ViteTunnelOptions = defaultOpt
 				tags: [
 					{
 						tag: "script",
-						injectTo: "head",
 						attrs: {
 							type: "module",
-							src: `${config.base || '/'}@id/virtual:vite-devtools-path:index.js`,
 						},
+						children: composePreambleCode({ baseWithOrigin }),
 					},
 				],
 			};
