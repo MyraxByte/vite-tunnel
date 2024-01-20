@@ -1,9 +1,14 @@
 {
 	"name": "@vite-libs/tunnel",
 	"type": "module",
-	"version": "1.0.4",
+	"version": "1.0.6",
 	"description": "A vite plugin for tunneling",
-	"author": "Anton Ryuben",
+	"author": "Anton Ryuben (https://github.com/MyraxByte)",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/MyraxByte/vite-tunnel.git"
+	  },
+	"bugs": "https://github.com/MyraxByte/vite-tunnel/issues",
 	"license": "MIT",
 	"keywords": [
 		"vite-plugin",
