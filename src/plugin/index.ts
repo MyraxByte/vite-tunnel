@@ -8,7 +8,7 @@ type ViteTunnelOptions = TunnelOptions;
 
 function getDevtoolsPath() {
 	const pluginPath = normalizePath(path.dirname(fileURLToPath(import.meta.url)))
-	return pluginPath.replace(/\/dist$/, '/\/src')
+	return pluginPath.replace(/\/dist$/, '/\/dist/client')
 }
 
 const defaultOptions: ViteTunnelOptions = {
@@ -35,13 +35,13 @@ export default function ViteTunnelPlugin(options: ViteTunnelOptions = defaultOpt
 			config = resolvedConfig
 		},
 		configureServer(server) {
-			server.ws.on("vite-tunnel-devtools:vite-tunnel:initialized", async () => {
+			server.ws.on("vite-devtools:vite-tunnel:initialized", async () => {
 				server.ws.send("vite-tunnel:tunnel-url", {
 					url: await tunnel?.getURL(),
 				});
 			});
 
-			server.ws.on("vite-tunnel-devtools:vite-tunnel:toggled", async () => {
+			server.ws.on("vite-devtools:vite-tunnel:toggled", async () => {
 				// Send the tunnel URL to the client when the user clicks on the app icon
 				server.ws.send("vite-tunnel:tunnel-url", {
 					url: await tunnel?.getURL(),
@@ -66,24 +66,24 @@ export default function ViteTunnelPlugin(options: ViteTunnelOptions = defaultOpt
 			);
 		},
 		async resolveId(importer: string) {
-			if (importer.startsWith('virtual:vite-tunnel-devtools-options')) {
+			if (importer.startsWith('virtual:vite-devtools-options')) {
 				return importer
 			}
-			else if (importer.startsWith('virtual:vite-tunnel-devtools-path:')) {
-				const resolved = importer.replace('virtual:vite-tunnel-devtools-path:', `${devtoolsPath}/`)
+			else if (importer.startsWith('virtual:vite-devtools-path:')) {
+				const resolved = importer.replace('virtual:vite-devtools-path:', `${devtoolsPath}/`)
 				return resolved
 			}
 		},
 		async load(id: string) {
-			if (id === 'virtual:vite-tunnel-devtools-options')
+			if (id === 'virtual:vite-devtools-options')
 				return `export default ${JSON.stringify({ base: config.base })}`
 		},
 		transform(code, id) {
 			const { root, base } = config
-	  
+
 			const projectPath = `${root}${base}`
-	  
 			if (!id.startsWith(projectPath)) return
+			console.log(id, projectPath)
 			return code
 		},
 		transformIndexHtml(html) {
@@ -95,7 +95,7 @@ export default function ViteTunnelPlugin(options: ViteTunnelOptions = defaultOpt
 						injectTo: "head",
 						attrs: {
 							type: "module",
-							src: `${config.base || '/'}@id/virtual:vite-tunnel-devtools-path:devtools.js`,
+							src: `${config.base || '/'}@id/virtual:vite-devtools-path:index.js`,
 						},
 					},
 				],
