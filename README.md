@@ -33,13 +33,15 @@ Vite Tunnel accepts the following options:
 
 ```ts
 ViteTunnelPlugin({
-  // The local server port to expose. Defaults to 5521.
+  // The URL to expose. Defaults to {protocol}://{hostname}:{port}.
+  url: 'http://localhost:5521',
+  // The local server port to expose. Defaults to 5521. (Only used if `url` is not set)
   port: 5521,
-  // The local server hostname to expose. Defaults to localhost.
-  host: "localhost",
-  // The local server protocol to use. Defaults to http.
+  // The local server hostname to expose. Defaults to localhost. (Only used if `url` is not set)
+  hostname: "localhost",
+  // The local server protocol to use. Defaults to http. (Only used if `url` is not set)
   protocol: "http",
-  // Whether to verify the local server TLS certificate. Defaults to false.
+  // Whether to verify the local server TLS certificate. Defaults to false. 
   verifyTLS: false,
   // Whether to accept the Cloudflare terms of service. Defaults to false.
   acceptCloudflareNotice: false,
