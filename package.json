@@ -1,7 +1,7 @@
 {
 	"name": "@vite-libs/tunnel",
 	"type": "module",
-	"version": "1.0.8",
+	"version": "1.0.9",
 	"description": "A vite plugin for tunneling",
 	"author": "Anton Ryuben (https://github.com/MyraxByte)",
 	"repository": {
@@ -40,7 +40,7 @@
 		"vite": "^3.1.0 || ^4.0.0-0 || ^5.0.0-0"
 	},
 	"dependencies": {
-		"@vite-libs/devtools": "^1.0.8",
+		"@vite-libs/devtools": "file:../devtools",
 		"untun": "^0.1.3"
 	},
 	"devDependencies": {
