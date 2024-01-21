@@ -125,7 +125,6 @@ export function inject() {
             main.appendChild(field);
             modal.appendChild(main);
     
-            console.log("tunnel", shadowRoot);
             shadowRoot.appendChild(modal);
         },
     }])
